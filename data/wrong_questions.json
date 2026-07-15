@@ -1,0 +1,83 @@
+[
+  {
+    "id": 1,
+    "subject": "数学",
+    "question_content": "已知函数 f(x) = x² - 4x + 3，求 f(x) 的最小值。",
+    "student_answer": "f(x) 的最小值是 3",
+    "correct_answer": "f(x) 的最小值是 -1，在 x = 2 处取得。",
+    "expected_error_type": "概念混淆",
+    "notes": "学生混淆了函数值与顶点坐标，直接将常数项当作最小值，未使用顶点公式 x=-b/(2a)"
+  },
+  {
+    "id": 2,
+    "subject": "物理",
+    "question_content": "一物体从静止开始沿光滑斜面下滑，斜面倾角为 30°，斜面长 10m。求物体滑到底端时的速度。（g 取 10 m/s²）",
+    "student_answer": "v = √(2gh) = √(2 × 10 × 10) = 10√2 ≈ 14.14 m/s",
+    "correct_answer": "h = 10 × sin30° = 5m，v = √(2gh) = √(2 × 10 × 5) = 10 m/s",
+    "expected_error_type": "计算失误",
+    "notes": "学生未将斜面长度转换为垂直高度（遗漏 sin30°），直接将斜面长度当作高度代入公式"
+  },
+  {
+    "id": 3,
+    "subject": "英语",
+    "question_content": "If I _______ you, I would accept the offer.\nA. am  B. was  C. were  D. be",
+    "student_answer": "B. was",
+    "correct_answer": "C. were (虚拟语气中 be 动词统一用 were)",
+    "expected_error_type": "知识盲区",
+    "notes": "学生不了解虚拟语气规则：与现在事实相反的虚拟条件句中，be 动词一律用 were"
+  },
+  {
+    "id": 4,
+    "subject": "化学",
+    "question_content": "配平以下化学方程式：Fe + O₂ → Fe₃O₄",
+    "student_answer": "2Fe + 2O₂ → Fe₃O₄",
+    "correct_answer": "3Fe + 2O₂ → Fe₃O₄",
+    "expected_error_type": "计算失误",
+    "notes": "铁原子数未配平：左边 2Fe 不等于右边 Fe₃O₄ 中的 3Fe"
+  },
+  {
+    "id": 5,
+    "subject": "数学",
+    "question_content": "解不等式 |2x - 1| < 3，并用区间表示解集。",
+    "student_answer": "x ∈ (1, 2)",
+    "correct_answer": "x ∈ (-1, 2)",
+    "expected_error_type": "逻辑推理错误",
+    "notes": "学生解绝对值不等式时只考虑了 2x-1 < 3（得 x < 2），遗漏了 2x-1 > -3（得 x > -1）这一半"
+  },
+  {
+    "id": 6,
+    "subject": "语文",
+    "question_content": "阅读下面文言文，翻译画线句：\n『学而不思则罔，思而不学则殆。』",
+    "student_answer": "学习了但不思考就会迷茫，思考了但不学习就会死亡。",
+    "correct_answer": "只学习不思考就会迷惘无所得，只思考不学习就会疑惑而无所得。",
+    "expected_error_type": "概念混淆",
+    "notes": "学生将'殆'错误理解为'死亡'（现代常用义），在古文中此处'殆'意为'疑惑而无所得'"
+  },
+  {
+    "id": 7,
+    "subject": "生物",
+    "question_content": "一对正常夫妇生了一个白化病男孩，请问他们再生一个孩子患白化病的概率是多少？",
+    "student_answer": "1/4",
+    "correct_answer": "1/4（父母均为杂合子 Aa，患病概率为 aa = 1/4）",
+    "expected_error_type": "审题偏差",
+    "notes": "学生答案碰巧正确但推理有误——错误地认为每次生育概率独立等于 1/4 即可，未推导出父母基因型为 Aa × Aa（由'正常夫妇生白化病孩子'反推），虽结果巧合但对但过程不严谨"
+  },
+  {
+    "id": 8,
+    "subject": "历史",
+    "question_content": "简述洋务运动的主要内容及其历史意义。",
+    "student_answer": "洋务运动是清政府的一次改革运动，主要内容是学习西方技术，历史意义是使中国走上了资本主义道路。",
+    "correct_answer": "主要内容：创办军事工业和民用工业、建立新式海军、兴办新式学堂。历史意义：开启了中国近代化进程，促进了民族资本主义的产生，但没有使中国走上富强道路。",
+    "expected_error_type": "知识盲区",
+    "notes": "学生对洋务运动具体内容记忆不全，且错误地认为洋务运动使中国走上了资本主义道路（实际上洋务运动的指导思想是'中体西用'，并未改变封建制度）"
+  },
+  {
+    "id": 9,
+    "subject": "物理",
+    "question_content": "一个电阻为 10Ω 的用电器，正常工作电压为 6V。现只有一个电压为 9V 的电源，需要串联一个多大的电阻才能使用电器正常工作？",
+    "student_answer": "串联一个 15Ω 的电阻",
+    "correct_answer": "I = 6V / 10Ω = 0.6A，R = (9V - 6V) / 0.6A = 5Ω",
+    "expected_error_type": "解题策略不当",
+    "notes": "学生使用了错误的公式组合，可能是直接用 9V / (6V/10Ω) = 15Ω，混淆了总电阻和分压电阻的计算方法"
+  }
+]

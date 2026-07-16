@@ -1,10 +1,11 @@
 ---
 name: AI错题教练
-version: 1.0.0
+version: 1.1.0
 author: course-project
 description: >
   智能错题分析 Skill。接收学生的错题信息（题目、学生答案、正确答案、学科），
-  自动执行错误原因分析、生成同类练习题、制定个性化 7 天复习计划。
+  自动执行错误原因分析、生成同类练习题、制定个性化 7 天复习计划，
+  并将学习报告导出上传至飞书云文档。
 triggers:
   - 错题分析
   - 分析错题
@@ -13,6 +14,9 @@ triggers:
   - 复习计划
   - AI错题
   - error coach
+  - 飞书上传
+  - 导出报告
+  - 上传飞书
 input_schema:
   question_content:
     type: string
@@ -60,6 +64,12 @@ output_schema:
       day_1~7: object           # 每天的学习任务
       total_review_items: int   # 复习知识点总数
       estimated_hours: float    # 预估总时长
+  feishu_upload:
+    type: object
+    fields:
+      file_token: string        # 飞书文件 token
+      document_url: string      # 飞书文档链接
+      local_path: string        # 本地报告路径
 scripts:
   - path: skill/scripts/analyze_error.py
     purpose: 错题原因分析
@@ -70,6 +80,9 @@ scripts:
   - path: skill/scripts/review_plan.py
     purpose: 生成 7 天复习计划
     inputs: [error_type, knowledge_points, subject]
+  - path: skill/scripts/upload_feishu.py
+    purpose: 生成学习报告并上传飞书云文档
+    inputs: [analysis_json, similar_json, review_json]
 references:
   - skill/references/error_types.md
   - skill/references/prompt_templates.md
@@ -79,7 +92,7 @@ references:
 
 ## 概述
 
-AI错题教练是一个面向学生和教师的智能错题分析 Skill。输入一道错题的相关信息，Skill 会依次执行三个核心功能：**错题原因分析** → **生成类似练习题** → **制定 7 天复习计划**，帮助学生从"做错一道题"到"彻底掌握一个知识点"。
+AI错题教练是一个面向学生和教师的智能错题分析 Skill。输入一道错题的相关信息，Skill 会依次执行四个核心功能：**错题原因分析** → **生成类似练习题** → **制定 7 天复习计划** → **导出报告并上传飞书**，帮助学生从"做错一道题"到"彻底掌握一个知识点"。
 
 ## 适用场景
 
@@ -114,9 +127,16 @@ AI错题教练是一个面向学生和教师的智能错题分析 Skill。输入
 │  Step 3: 生成复习计划  │  ← scripts/review_plan.py
 │  输出: 7天分阶段方案   │
 └──────────┬───────────┘
+           │ 全部分析结果
+           ▼
+┌──────────────────────┐
+│  Step 4: 导出 & 上传  │  ← scripts/upload_feishu.py
+│  输出: Markdown报告 +  │
+│        飞书文档链接    │
+└──────────┬───────────┘
            │
            ▼
-     完整分析报告
+     完整分析报告 & 飞书链接
 ```
 
 ## 输入说明
@@ -172,6 +192,19 @@ AI错题教练是一个面向学生和教师的智能错题分析 Skill。输入
 }
 ```
 
+### 功能4 — 导出并上传飞书
+
+```json
+{
+  "status": "success",
+  "local_path": "/path/to/output/learning_report_20260716_143000.md",
+  "file_token": "BxTnfGxxxxxx",
+  "document_url": "https://xxxxx.feishu.cn/drive/xxxxx",
+  "folder_token": "root",
+  "timestamp": "2026-07-16T14:30:00"
+}
+```
+
 ## 调用脚本说明
 
 ### analyze_error.py
@@ -208,23 +241,49 @@ python skill/scripts/review_plan.py \
 
 根据错误类型和知识点，制定 7 天分阶段复习计划，包含每天具体任务。
 
+### upload_feishu.py
+
+```bash
+python skill/scripts/upload_feishu.py \
+  --analysis output/analysis.json \
+  --similar output/similar_question.json \
+  --review output/review_plan.json
+
+# 也可以通过 --output-dir 自动加载
+python skill/scripts/upload_feishu.py --output-dir output/
+
+# 仅生成立报告，不上传飞书
+python skill/scripts/upload_feishu.py --analysis output/analysis.json --review output/review_plan.json --no-upload
+```
+
+合并前三步结果生成 Markdown 学习报告，保存到 `output/` 目录，调用飞书开放平台 API 上传至云文档 Drive，返回 `file_token` 和 `document_url`。
+
 ## 依赖
 
 - Python 3.9+
 - `openai` Python SDK（`pip install openai`）
+- `requests` Python 库（`pip install requests`，用于飞书 API 调用）
 - 有效的 OpenAI API Key（设置环境变量 `OPENAI_API_KEY`）
+- 飞书开放平台应用凭证（设置环境变量 `FEISHU_APP_ID` / `FEISHU_APP_SECRET`）—— 仅功能4需要
 
 ## 配置
 
 ```bash
+# LLM 相关（功能1-3 必需）
 export OPENAI_API_KEY="sk-xxx"
 export OPENAI_MODEL="gpt-4o"          # 可选，默认 gpt-4o
 export OPENAI_TEMPERATURE="0.3"       # 可选，默认 0.3
+
+# 飞书上传（功能4 必需）
+export FEISHU_APP_ID="cli_xxxxxxxxxxxx"
+export FEISHU_APP_SECRET="xxxxxxxxxxxxxxxxxxxxxxxxxx"
+export FEISHU_FOLDER_TOKEN="xxxxx"    # 可选，上传目标文件夹
 ```
 
 ## 注意事项
 
-1. **API 调用成本**：每次分析会调用 3 次 OpenAI API（分析 + 出题 + 复习计划），请注意 token 消耗。
+1. **API 调用成本**：每次完整分析会调用 3 次 OpenAI API（分析 + 出题 + 复习计划）+ 1 次飞书 API（上传），请注意 token 消耗。
 2. **Prompt 可定制**：如需调整分析风格、出题难度等，修改 `skill/references/prompt_templates.md` 即可，无需改代码。
 3. **错误类型扩展**：如需新增错误分类，在 `skill/references/error_types.md` 中添加即可，脚本会自动加载。
-4. **独立运行**：三个脚本可独立使用，也可串联使用。若已有分析结果，可直接调用 `generate_question.py` 或 `review_plan.py`。
+4. **独立运行**：四个脚本可独立使用，也可串联使用。若已有分析结果，可直接调用 `generate_question.py`、`review_plan.py` 或 `upload_feishu.py`。
+5. **飞书上传**：功能4 需要先在飞书开放平台创建应用并获取 App ID 和 App Secret，详见飞书开放平台文档。
